@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using secureBankingSystem.Models;
+using System.Globalization;
 
 namespace secureBankingSystem.Services
 {
@@ -25,9 +26,9 @@ namespace secureBankingSystem.Services
         {
             Console.Write("\nEnter amount to deposit: ");
             string input = Console.ReadLine() ?? "";
-            double amount;
+            decimal amount;
 
-            while (!double.TryParse(input, out amount))
+            while (!decimal.TryParse(input, out amount))
             {
                 Console.WriteLine("Only numerical data can be entered for deposit.");
                 Console.Write("Enter amount to deposit: ");
@@ -53,9 +54,9 @@ namespace secureBankingSystem.Services
         {
             Console.Write("\nEnter amount to withdraw: ");
             string input = Console.ReadLine() ?? "";
-            double amount;
+            decimal amount;
 
-            while (!double.TryParse(input, out amount))
+            while (!decimal.TryParse(input, out amount))
             {
                 Console.WriteLine("Only numerical data to be entered for withdrawal.");
                 Console.Write("Enter amount to withdraw: ");

@@ -12,7 +12,7 @@ namespace secureBankingSystem.Models
         public int Age { get; set; }
         public string Phone { get; set; }
         public string PasswordHash { get; set; }
-        public double Balance { get; set; }
+        public decimal Balance { get; set; }
         public List<string> Transactions { get; set; }
 
         // Constructor creates a user object with all required details
