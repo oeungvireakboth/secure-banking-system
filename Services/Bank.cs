@@ -74,7 +74,7 @@ namespace secureBankingSystem.Services
                 Console.WriteLine("Not sufficient fund available.");
 
                 // Save failed attempt
-                user.Transactions.Add("Failed withdrawal of $" + amount + " (insufficient funds)");
+                user.Transactions.Add($"Failed withdrawal of {amount.ToString("F2", CultureInfo.InvariantCulture)} (insufficient funds)");
 
                 return;
 
@@ -83,7 +83,7 @@ namespace secureBankingSystem.Services
             user.Balance -= amount;
 
             // Save transaction
-            user.Transactions.Add("Withdrew $" + amount);
+            user.Transactions.Add($"Withdrew {amount.ToString("F2", CultureInfo.InvariantCulture)}");
 
             Console.WriteLine("Withdrawal successful.");
             Console.WriteLine("Updated balance: $" + user.Balance);
