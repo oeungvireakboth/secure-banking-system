@@ -200,7 +200,9 @@ namespace secureBankingSystem.Services
                 password = Console.ReadLine() ?? "";
             }
 
-            User newUser = new User(username, email, age, phone, password);
+            string passwordHash = new PasswordService().HashPassword(password);
+
+            User newUser = new User(username, email, age, phone, passwordHash);
             users.Add(newUser);
 
             Console.WriteLine("\nAccount created successfully.");
