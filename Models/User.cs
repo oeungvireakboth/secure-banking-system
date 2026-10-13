@@ -11,7 +11,7 @@ namespace secureBankingSystem.Models
         public string Email { get; set; }
         public int Age { get; set; }
         public string Phone { get; set; }
-        public string Password { get; set; }
+        public string PasswordHash { get; set; }
         public double Balance { get; set; }
         public List<string> Transactions { get; set; }
 
@@ -22,7 +22,7 @@ namespace secureBankingSystem.Models
             Email = email;
             Age = age;
             Phone = phone;
-            Password = password;
+            PasswordHash = password;
 
             // New users start with a zero balance
             Balance = 0;

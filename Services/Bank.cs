@@ -14,10 +14,10 @@ namespace secureBankingSystem.Services
         public Bank()
         {
             users = new List<User>();
-            users.Add(new User("Joe.Doe", "joe.doe@email.com", 30, "0414824718", "Password123"));
+            PasswordService passwordService = new PasswordService();
+            users.Add(new User("Joe.Doe", "joe.doe@email.com", 30, "0414824718", passwordService.HashPassword("Password123")));
             authenticationService = new AuthenticationService(users);
         }
-
         // Returns the logged-in user if credentials match; otherwise returns null
 
         // Allows the logged-in user to deposit money into their balance

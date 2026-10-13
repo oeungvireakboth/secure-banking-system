@@ -16,7 +16,8 @@ namespace secureBankingSystem.Services
         {
             foreach (User user in users)
             {
-                if (user.Username == username && user.Password == password)
+                if (user.Username == username
+                && passwordService.VerifyPassword(password, user.PasswordHash))
                 {
                     return user;
                 }
@@ -24,5 +25,6 @@ namespace secureBankingSystem.Services
 
             return null;
         }
+        private readonly PasswordService passwordService = new PasswordService();
     }
 }
