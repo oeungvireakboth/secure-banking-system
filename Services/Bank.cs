@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using secureBankingSystem.Models;
 using System.Globalization;
+using secureBankingSystem.Data;
 
 namespace secureBankingSystem.Services
 {
@@ -10,13 +11,13 @@ namespace secureBankingSystem.Services
 
         private List<User> users;
         private AuthenticationService authenticationService;
+        private readonly DatabaseService database;
 
         // Constructor sets up the system and adds a dummy user for testing
-        public Bank()
+        public Bank(DatabaseService database)
         {
-            users = new List<User>();
-            PasswordService passwordService = new PasswordService();
-            users.Add(new User("Joe.Doe", "joe.doe@email.com", 30, "0414824718", passwordService.HashPassword("Password123")));
+            this.database = database;
+            users = database.LoadUsers();
             authenticationService = new AuthenticationService(users);
         }
         // Returns the logged-in user if credentials match; otherwise returns null
@@ -41,9 +42,16 @@ namespace secureBankingSystem.Services
                 return;
             }
 
-            user.Balance += amount;
+            
+            decimal newBalance = user.Balance + amount;
+
+            database.UpdateUserBalance(user.Username, newBalance);
+            user.Balance = newBalance;
+
             // Save transaction
             user.Transactions.Add("Deposited $" + amount);
+
+            database.SaveTransaction(user.Username, $"Deposited $" + amount);
 
             Console.WriteLine("Deposit successful.");
             Console.WriteLine("Updated balance: $" + user.Balance);
@@ -80,10 +88,17 @@ namespace secureBankingSystem.Services
 
             }
 
-            user.Balance -= amount;
+            decimal newBalance = user.Balance - amount;
+
+            database.UpdateUserBalance(user.Username, newBalance);
+            user.Balance = newBalance;
 
             // Save transaction
-            user.Transactions.Add($"Withdrew {amount.ToString("F2", CultureInfo.InvariantCulture)}");
+            string description =
+            $"Withdrew {amount.ToString("F2", CultureInfo.InvariantCulture)}";
+
+            user.Transactions.Add(description);
+            database.SaveTransaction(user.Username, description);
 
             Console.WriteLine("Withdrawal successful.");
             Console.WriteLine("Updated balance: $" + user.Balance);
@@ -204,6 +219,16 @@ namespace secureBankingSystem.Services
             string passwordHash = new PasswordService().HashPassword(password);
 
             User newUser = new User(username, email, age, phone, passwordHash);
+
+            database.SaveUser(
+                newUser.Username,
+                newUser.Email,
+                newUser.Age,
+                newUser.Phone,
+                newUser.PasswordHash,
+                newUser.Balance
+            );
+
             users.Add(newUser);
 
             Console.WriteLine("\nAccount created successfully.");
@@ -320,6 +345,9 @@ namespace secureBankingSystem.Services
         // Displays all transactions for the logged-in user
         public void ViewTransactionHistory(User user)
         {
+            user.Transactions.Clear();
+            user.Transactions.AddRange(
+                database.LoadTransactions(user.Username));
             Console.WriteLine("\n==================================");
             Console.WriteLine("      TRANSACTION HISTORY");
             Console.WriteLine("==================================");

@@ -15,3 +15,7 @@ obj/
 .env.*
 !.env.example
 appsettings.Local.json
+# Local SQLite databases
+*.db
+*.db-shm
+*.db-wal

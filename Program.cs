@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using secureBankingSystem.Services;
 using secureBankingSystem.Models;
+using secureBankingSystem.Data;
 
 namespace secureBankingSystem
 {
@@ -14,7 +15,12 @@ namespace secureBankingSystem
     {
         static void Main(string[] args)
         {
-            Bank bank = new Bank();
+            DatabaseService database = new DatabaseService("Data Source=banking_system.db");
+            database.InitializeDatabase();
+
+            Console.WriteLine("Database initialized successfully.");
+
+            Bank bank = new Bank(database);
             bool running = true;
 
             while (running)
