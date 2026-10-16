@@ -19,28 +19,39 @@ namespace secureBankingSystem.Services
 
             return $"{Convert.ToBase64String(salt)}:{Convert.ToBase64String(hash)}";
         }
-        public bool VerifyPassword(string password, string storedPassword)
+        
+public bool VerifyPassword(string password, string storedPassword)
 {
     string[] parts = storedPassword.Split(':');
 
     if (parts.Length != 2)
         return false;
 
-    byte[] salt = Convert.FromBase64String(parts[0]);
-    byte[] expectedHash = Convert.FromBase64String(parts[1]);
+    try
+    {
+        byte[] salt = Convert.FromBase64String(parts[0]);
+        byte[] expectedHash = Convert.FromBase64String(parts[1]);
 
-    byte[] actualHash = Rfc2898DeriveBytes.Pbkdf2(
-        password,
-        salt,
-        100_000,
-        HashAlgorithmName.SHA256,
-        32
-    );
+        if (salt.Length != 16 || expectedHash.Length != 32)
+            return false;
 
-    return CryptographicOperations.FixedTimeEquals(
-        actualHash,
-        expectedHash
-    );
+        byte[] actualHash = Rfc2898DeriveBytes.Pbkdf2(
+            password,
+            salt,
+            100_000,
+            HashAlgorithmName.SHA256,
+            32
+        );
+
+        return CryptographicOperations.FixedTimeEquals(
+            actualHash,
+            expectedHash
+        );
+    }
+    catch (FormatException)
+    {
+        return false;
+    }
 }
     }
 }
