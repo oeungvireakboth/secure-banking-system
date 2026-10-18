@@ -7,7 +7,7 @@ using secureBankingSystem.Data;
 namespace secureBankingSystem.Services
 {
     class Bank
-        {
+    {
 
         private List<User> users;
         private AuthenticationService authenticationService;
@@ -21,6 +21,12 @@ namespace secureBankingSystem.Services
             authenticationService = new AuthenticationService(users);
         }
         // Returns the logged-in user if credentials match; otherwise returns null
+
+        // Returns true if the amount is valid (greater than zero); otherwise returns false
+        public bool IsValidAmount(decimal amount)
+        {
+            return amount > 0;
+        }
 
         // Allows the logged-in user to deposit money into their balance
         public void Deposit(User user)
@@ -36,13 +42,13 @@ namespace secureBankingSystem.Services
                 input = Console.ReadLine() ?? "";
             }
 
-            if (amount <= 0)
+            if (!AmountValidator.IsValidAmount(amount))
             {
                 Console.WriteLine("Deposit amount must be greater than zero.");
                 return;
             }
 
-            
+
             decimal newBalance = user.Balance + amount;
 
             database.UpdateUserBalance(user.Username, newBalance);
@@ -71,7 +77,7 @@ namespace secureBankingSystem.Services
                 input = Console.ReadLine() ?? "";
             }
 
-            if (amount <= 0)
+            if (!AmountValidator.IsValidAmount(amount))
             {
                 Console.WriteLine("Withdrawal amount must be greater than zero.");
                 return;

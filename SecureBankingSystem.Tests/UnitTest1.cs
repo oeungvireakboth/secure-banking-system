@@ -6,7 +6,7 @@ namespace SecureBankingSystem.Tests;
 
 public class PasswordServiceTests
 {
-        
+
     [Fact]
     public void VerifyPassword_RejectsInvalidBase64()
     {
@@ -56,5 +56,21 @@ public class PasswordServiceTests
         string hash = service.HashPassword("Password123");
 
         Assert.False(service.VerifyPassword("WrongPassword", hash));
+    }
+
+
+}
+public class AmountValidatorTests
+{
+    [Theory]
+    [InlineData(10, true)]
+    [InlineData(0, false)]
+    [InlineData(-5, false)]
+    public void IsValidAmount_ReturnsExpectedResult(
+        decimal amount, bool expected)
+    {
+        bool result = AmountValidator.IsValidAmount(amount);
+
+        Assert.Equal(expected, result);
     }
 }
