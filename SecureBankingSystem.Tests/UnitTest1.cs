@@ -74,3 +74,24 @@ public class AmountValidatorTests
         Assert.Equal(expected, result);
     }
 }
+
+public class WithdrawalValidatorTests
+{
+    [Theory]
+    [InlineData(100, 50, true)]
+    [InlineData(100, 100, true)]
+    [InlineData(100, 150, false)]
+    [InlineData(100, 0, false)]
+    [InlineData(100, -20, false)]
+    public void CanWithdraw_ReturnsExpectedResult(
+        decimal balance,
+        decimal amount,
+        bool expected)
+    {
+        bool result = WithdrawalValidator.CanWithdraw(
+        balance, amount);
+
+        Assert.Equal(expected, result);
+    }
+}
+

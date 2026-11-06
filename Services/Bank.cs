@@ -83,15 +83,18 @@ namespace secureBankingSystem.Services
                 return;
             }
 
-            if (amount > user.Balance)
+            if (!WithdrawalValidator.CanWithdraw(user.Balance, amount))
             {
                 Console.WriteLine("Not sufficient fund available.");
 
                 // Save failed attempt
-                user.Transactions.Add($"Failed withdrawal of {amount.ToString("F2", CultureInfo.InvariantCulture)} (insufficient funds)");
+                string failedDescription =
+                    $"Failed withdrawal of {amount.ToString("F2", CultureInfo.InvariantCulture)} (insufficient funds)";
+
+                user.Transactions.Add(failedDescription);
+                database.SaveTransaction(user.Username, failedDescription);
 
                 return;
-
             }
 
             decimal newBalance = user.Balance - amount;
