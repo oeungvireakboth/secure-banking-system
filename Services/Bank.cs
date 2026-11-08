@@ -49,7 +49,13 @@ namespace secureBankingSystem.Services
             }
 
 
-            decimal newBalance = user.Balance + amount;
+            if (!BalanceCalculator.TryCalculateDeposit(
+                user.Balance, amount, out decimal newBalance
+                ))
+            {
+                Console.WriteLine("Unable to process deposit. Please check the amount and try again.");
+                return;
+            }
 
             database.UpdateUserBalance(user.Username, newBalance);
             user.Balance = newBalance;
@@ -97,7 +103,13 @@ namespace secureBankingSystem.Services
                 return;
             }
 
-            decimal newBalance = user.Balance - amount;
+            if (!BalanceCalculator.TryCalculateWithdrawal(
+                user.Balance, amount, out decimal newBalance
+                ))
+            {
+                Console.WriteLine("Unable to process withdrawal. Please check the amount and try again.");
+                return;
+            }
 
             database.UpdateUserBalance(user.Username, newBalance);
             user.Balance = newBalance;
