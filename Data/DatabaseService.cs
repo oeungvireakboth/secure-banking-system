@@ -40,7 +40,7 @@ namespace secureBankingSystem.Data
 
             command.ExecuteNonQuery();
         }
-        
+
         public void SaveUser(
             string username,
             string email,
@@ -72,7 +72,7 @@ namespace secureBankingSystem.Data
 
             command.ExecuteNonQuery();
         }
-        
+
         public void UpdateUserBalance(string username, decimal balance)
         {
             using var connection = new SqliteConnection(connectionString);
@@ -94,7 +94,7 @@ namespace secureBankingSystem.Data
 
             command.ExecuteNonQuery();
         }
-         
+
         public void SaveTransaction(string username, string description)
         {
             using var connection = new SqliteConnection(connectionString);
@@ -115,7 +115,7 @@ namespace secureBankingSystem.Data
 
             command.ExecuteNonQuery();
         }
-        
+
         public List<string> LoadTransactions(string username)
         {
             var transactions = new List<string>();
@@ -180,5 +180,61 @@ namespace secureBankingSystem.Data
 
             return users;
         }
+
+        public void UpdateBalanceAndSaveTransaction(
+            string username,
+            decimal newBalance,
+            string description)
+        {
+            using var connection = new SqliteConnection(connectionString);
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+
+            using var balanceCommand = connection.CreateCommand();
+
+            balanceCommand.Transaction = transaction;
+
+            balanceCommand.CommandText = @"
+        UPDATE Users
+        SET Balance = $balance
+        WHERE Username = $username;
+    ";
+
+            balanceCommand.Parameters.AddWithValue(
+                "$balance",
+                newBalance.ToString(
+                    System.Globalization.CultureInfo.InvariantCulture));
+
+            balanceCommand.Parameters.AddWithValue("$username", username);
+
+            int rowsUpdated = balanceCommand.ExecuteNonQuery();
+
+            if (rowsUpdated != 1)
+            {
+                throw new InvalidOperationException(
+                    "Account balance could not be updated.");
+            }
+
+            using var transactionCommand = connection.CreateCommand();
+
+            transactionCommand.Transaction = transaction;
+
+            transactionCommand.CommandText = @"
+            INSERT INTO Transactions (Username, Description, CreatedAt)
+            VALUES ($username, $description, $createdAt);
+            ";
+
+            transactionCommand.Parameters.AddWithValue("$username", username);
+            transactionCommand.Parameters.AddWithValue("$description", description);
+            transactionCommand.Parameters.AddWithValue(
+                "$createdAt",
+                DateTime.UtcNow.ToString("O"));
+
+            transactionCommand.ExecuteNonQuery();
+
+            transaction.Commit();
+        }
+
     }
 }

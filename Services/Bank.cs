@@ -57,13 +57,16 @@ namespace secureBankingSystem.Services
                 return;
             }
 
-            database.UpdateUserBalance(user.Username, newBalance);
+            string description = $"Deposited ${amount}";
+
+            database.UpdateBalanceAndSaveTransaction(
+                user.Username,
+                newBalance,
+                description
+            );
+
             user.Balance = newBalance;
-
-            // Save transaction
-            user.Transactions.Add("Deposited $" + amount);
-
-            database.SaveTransaction(user.Username, $"Deposited $" + amount);
+            user.Transactions.Add(description);
 
             Console.WriteLine("Deposit successful.");
             Console.WriteLine("Updated balance: $" + user.Balance);
@@ -111,15 +114,19 @@ namespace secureBankingSystem.Services
                 return;
             }
 
-            database.UpdateUserBalance(user.Username, newBalance);
-            user.Balance = newBalance;
 
-            // Save transaction
             string description =
-            $"Withdrew {amount.ToString("F2", CultureInfo.InvariantCulture)}";
+                $"Withdrew {amount.ToString("F2", CultureInfo.InvariantCulture)}";
 
+            database.UpdateBalanceAndSaveTransaction(
+                user.Username,
+                newBalance,
+                description
+            );
+
+            user.Balance = newBalance;
             user.Transactions.Add(description);
-            database.SaveTransaction(user.Username, description);
+
 
             Console.WriteLine("Withdrawal successful.");
             Console.WriteLine("Updated balance: $" + user.Balance);
