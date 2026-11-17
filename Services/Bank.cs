@@ -7,7 +7,7 @@ using Microsoft.Data.Sqlite;
 
 namespace secureBankingSystem.Services
 {
-    class Bank
+    public class Bank
     {
 
         private List<User> users;
