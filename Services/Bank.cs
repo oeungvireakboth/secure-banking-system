@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using secureBankingSystem.Models;
 using System.Globalization;
 using secureBankingSystem.Data;
+using Microsoft.Data.Sqlite;
 
 namespace secureBankingSystem.Services
 {
@@ -59,14 +60,21 @@ namespace secureBankingSystem.Services
 
             string description = $"Deposited ${amount}";
 
-            database.UpdateBalanceAndSaveTransaction(
-                user.Username,
-                newBalance,
-                description
-            );
+            try
+            {
+                database.UpdateBalanceAndSaveTransaction(
+                    user.Username,
+                    newBalance,
+                    description
+                );
+            }
+            catch (SqliteException)
+            {
+                Console.WriteLine("Deposit failed due to a database error.");
+                return;
+            }
 
             user.Balance = newBalance;
-            user.Transactions.Add(description);
 
             Console.WriteLine("Deposit successful.");
             Console.WriteLine("Updated balance: $" + user.Balance);
@@ -116,13 +124,21 @@ namespace secureBankingSystem.Services
 
 
             string description =
-                $"Withdrew {amount.ToString("F2", CultureInfo.InvariantCulture)}";
+            $"Withdrew {amount.ToString("F2", CultureInfo.InvariantCulture)}";
 
-            database.UpdateBalanceAndSaveTransaction(
-                user.Username,
-                newBalance,
-                description
-            );
+            try
+            {
+                database.UpdateBalanceAndSaveTransaction(
+                    user.Username,
+                    newBalance,
+                    description
+                );
+            }
+            catch (SqliteException)
+            {
+                Console.WriteLine("Withdrawal failed due to a database error.");
+                return;
+            }
 
             user.Balance = newBalance;
             user.Transactions.Add(description);
