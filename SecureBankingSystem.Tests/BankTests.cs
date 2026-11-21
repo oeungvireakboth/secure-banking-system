@@ -162,5 +162,79 @@ namespace SecureBankingSystem.Tests
             }
         }
 
+        [Fact]
+        public void Withdraw_InsufficientFundsDatabaseFailure_DoesNotRecordTransaction()
+        {
+            string dbPath = Path.Combine(
+                Path.GetTempPath(),
+                $"bank_insufficient_test_{Guid.NewGuid()}.db");
+
+            TextReader originalInput = Console.In;
+            TextWriter originalOutput = Console.Out;
+
+            try
+            {
+                var database = new DatabaseService(
+                    $"Data Source={dbPath};Pooling=False");
+
+                database.InitializeDatabase();
+
+                database.SaveUser(
+                    "TestUser",
+                    "test@example.com",
+                    25,
+                    "1234567890",
+                    "test-hash",
+                    100m);
+
+                // Simulate a database failure when saving transactions
+                using (var connection = new SqliteConnection(
+                    $"Data Source={dbPath};Pooling=False"))
+                {
+                    connection.Open();
+
+                    using var command = connection.CreateCommand();
+
+                    command.CommandText = @"
+                CREATE TRIGGER FailTransactionInsert
+                BEFORE INSERT ON Transactions
+                BEGIN
+                    SELECT RAISE(ABORT, 'Simulated database failure');
+                END;
+            ";
+
+                    command.ExecuteNonQuery();
+                }
+
+                var bank = new Bank(database);
+                var user = database.LoadUsers()[0];
+
+                // Attempt to withdraw $150 from an account with $100
+                Console.SetIn(new StringReader("150"));
+                var output = new StringWriter();
+                Console.SetOut(output);
+
+                bank.Withdraw(user);
+
+                Assert.Equal(100m, user.Balance);
+                Assert.Empty(user.Transactions);
+
+                Assert.Contains(
+                    "Unable to record failed withdrawal due to a database error.",
+                    output.ToString());
+
+                Assert.Empty(database.LoadTransactions("TestUser"));
+            }
+            finally
+            {
+                Console.SetIn(originalInput);
+                Console.SetOut(originalOutput);
+
+                if (File.Exists(dbPath))
+                {
+                    File.Delete(dbPath);
+                }
+            }
+        }
     }
 }

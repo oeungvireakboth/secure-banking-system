@@ -19,7 +19,7 @@ namespace secureBankingSystem.Services
         {
             this.database = database;
             users = database.LoadUsers();
-            authenticationService = new AuthenticationService(users);
+            authenticationService = new AuthenticationService(users, database);
         }
         // Returns the logged-in user if credentials match; otherwise returns null
 
@@ -104,24 +104,32 @@ namespace secureBankingSystem.Services
             {
                 Console.WriteLine("Not sufficient fund available.");
 
-                // Save failed attempt
                 string failedDescription =
                     $"Failed withdrawal of {amount.ToString("F2", CultureInfo.InvariantCulture)} (insufficient funds)";
 
+                try
+                {
+                    database.SaveTransaction(user.Username, failedDescription);
+                }
+                catch (SqliteException)
+                {
+                    Console.WriteLine(
+                        "Unable to record failed withdrawal due to a database error.");
+                    return;
+                }
+
                 user.Transactions.Add(failedDescription);
-                database.SaveTransaction(user.Username, failedDescription);
 
                 return;
             }
 
             if (!BalanceCalculator.TryCalculateWithdrawal(
-                user.Balance, amount, out decimal newBalance
-                ))
+                user.Balance, amount, out decimal newBalance))
             {
-                Console.WriteLine("Unable to process withdrawal. Please check the amount and try again.");
+                Console.WriteLine(
+                    "Unable to process withdrawal. Please check the amount and try again.");
                 return;
             }
-
 
             string description =
             $"Withdrew {amount.ToString("F2", CultureInfo.InvariantCulture)}";

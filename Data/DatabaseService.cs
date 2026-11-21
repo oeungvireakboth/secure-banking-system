@@ -95,6 +95,31 @@ namespace secureBankingSystem.Data
             command.ExecuteNonQuery();
         }
 
+        public void UpdatePasswordHash(string username, string newPasswordHash)
+        {
+            using var connection = new SqliteConnection(connectionString);
+            connection.Open();
+
+            using var command = connection.CreateCommand();
+
+            command.CommandText = @"
+            UPDATE Users
+            SET PasswordHash = $passwordHash
+            WHERE Username = $username;
+            ";
+
+            command.Parameters.AddWithValue("$passwordHash", newPasswordHash);
+            command.Parameters.AddWithValue("$username", username);
+
+            int rowsUpdated = command.ExecuteNonQuery();
+
+            if (rowsUpdated != 1)
+            {
+                throw new InvalidOperationException(
+                    "Password hash could not be updated.");
+            }
+        }
+
         public void SaveTransaction(string username, string description)
         {
             using var connection = new SqliteConnection(connectionString);
